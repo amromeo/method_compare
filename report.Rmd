@@ -1,39 +1,58 @@
 ---
-title: "Method Comparison & Bias Estimation"
-author: "https://bahar.shinyapps.io/method_compare"
+title: "CHOP Coagulation Method Comparison & Bias Estimation"
 date: '`r Sys.Date()`'
 output: pdf_document
+params:
+ data: "final_data"
+ m1: "old"
+ m2: "new"
+ syx: 1
+ regmodel: "LinReg"
+ cimethod: "analytical"
+ metbootci: 'BCa'
+ batype: 3
+ ciarea: TRUE
+ legend: TRUE
+ identity: TRUE
+ addcor: TRUE
+ cormet: 'pearson'
+ name: ''
+
 ---
+### Analyst
+`r params$name`
+Signature:______________
+
 
 ```{r dataframe, comment = '', echo=FALSE, warning = FALSE, message = FALSE}
 library(mcr)
 library(pander)
-a <- datasetInput()
+a <- params$data
 if (is.null(a)) {
 return(NULL)} else {
 names(a) <- c("M1", "M2")
-data1 <- mcreg(a$M1, a$M2, error.ratio = input$syx, 
-method.reg = input$regmodel, method.ci = input$cimethod,
-method.bootstrap.ci = input$metbootci, slope.measure = "radian",
-mref.name = input$var1, mtest.name = input$var2, na.rm = TRUE)
-tname <- paste('X:', input$m1, '; Y:',  input$m2, '; S: Sample No.')
+data1 <- mcreg(a$M1, a$M2, error.ratio = params$syx, 
+method.reg = params$regmodel, method.ci = params$cimethod,
+method.bootstrap.ci = params$metbootci, slope.measure = "radian",
+mref.name = params$m1, mtest.name = params$m2, na.rm = TRUE)
+tname <- paste('X:', params$m1, '; Y:',  params$m2, '; S: Sample No.')
 pander(MCResult.getData(data1), caption = tname, style = "grid")
 }
 ```
 
 ```{r regression plot, echo = FALSE, results = 'markup', fig.show = 'asis', message = FALSE}
 library(mcr)
-a <- datasetInput()
+a <- params$data
 if (is.null(a)) {
 return(NULL)} else {
 names(a) <- c("M1", "M2")
-data1<- mcreg(a$M1, a$M2, error.ratio = input$syx, 
-method.reg = input$regmodel, method.ci = input$cimethod,
-method.bootstrap.ci = input$metbootci, slope.measure = "radian", na.rm = TRUE)
-MCResult.plot(data1, ci.area = input$ciarea, 
-add.legend = input$legend, identity = input$identity,
-add.cor = input$addcor, x.lab = input$m1,
-y.lab = input$m2, cor.method = input$cormet, 
+data1<- mcreg(a$M1, a$M2, error.ratio = params$syx, 
+method.reg = params$regmodel, method.ci = params$cimethod,
+method.bootstrap.ci = params$metbootci, slope.measure = "radian", na.rm = TRUE)
+MCResult.plot(data1, ci.area = params$ciarea, 
+add.legend = params$legend, identity = params$identity,
+add.cor = params$addcor, x.lab = params$m1,
+y.lab = params$m2, cor.method = params$cormet, 
 equal.axis = TRUE, add.grid = TRUE)
 }
 ```
@@ -41,41 +60,42 @@ equal.axis = TRUE, add.grid = TRUE)
 ```{r statistics, echo = FALSE, comment = '', warning = FALSE, message = FALSE}
 library(mcr)
 library(pander)
-a <- datasetInput()
+a <- params$data
 if (is.null(a)) {
 return(NULL)} else {
 names(a) <- c("M1", "M2")
-data1 <- mcreg(a$M1, a$M2, error.ratio = input$syx, 
-method.reg = input$regmodel, method.ci = input$cimethod,
-method.bootstrap.ci = input$metbootci, slope.measure = "radian",
-mref.name = input$var1, mtest.name = input$var2, na.rm = TRUE)
+data1 <- mcreg(a$M1, a$M2, error.ratio = params$syx, 
+method.reg = params$regmodel, method.ci = params$cimethod,
+method.bootstrap.ci = params$metbootci, slope.measure = "radian",
+mref.name = params$m1, mtest.name = params$m2, na.rm = TRUE)
 pander(getCoefficients(data1), caption = "Estimate (EST), standard error (SE) and upper-lower confidence interval (UCI-LCI) for intercept and slope", style = "grid")
 }
 ```
 
 ```{r coef plot, echo = FALSE, comment = '', warning = FALSE, message = FALSE}
 library(mcr)
-a <- datasetInput()
+a <- params$data
 if (is.null(a)) {
 return(NULL)} else {
 names(a) <- c("M1", "M2")
-data1 <- mcreg(a$M1, a$M2, error.ratio = input$syx, 
-method.reg = input$regmodel, method.ci = input$cimethod,
-method.bootstrap.ci = input$metbootci, slope.measure = "radian",
-mref.name = input$var1, mtest.name = input$var2, na.rm = TRUE)
+data1 <- mcreg(a$M1, a$M2, error.ratio = params$syx, 
+method.reg = params$regmodel, method.ci = params$cimethod,
+method.bootstrap.ci = params$metbootci, slope.measure = "radian",
+mref.name = params$m1, mtest.name = params$m2, na.rm = TRUE)
 compareFit(data1)
 }
 ```
 
 ```{r BA plot, echo=FALSE, results = 'markup'}
 library(mcr)
-a <- datasetInput()
+a <- params$data
 if (is.null(a)) {
 return(NULL)} else {
 names(a) <- c("M1", "M2")
 data1 <- mcreg(a$M1, a$M2,
-mref.name = input$m1, mtest.name = input$m2, na.rm = TRUE)
-MCResult.plotDifference(data1, plot.type = input$batype, add.grid = TRUE)
+mref.name = params$m1, mtest.name = params$m2, na.rm = TRUE)
+MCResult.plotDifference(data1, plot.type = params$batype, add.grid = TRUE)
+MCResult.plotDifference(data1, plot.type = 4, add.grid = TRUE) # Hard code want percent BA
 }
 ```
 
